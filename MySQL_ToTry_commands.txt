@@ -428,14 +428,6 @@ SELECT * FROM customer NATURAL JOIN ordert NATURAL JOIN order_line;
 
 DELETE FROM customer WHERE CUSTOMER_ID ='10001';
 
-LOAD DATA LOCAL INFILE 'ordersystem/customer.csv'
-INTO TABLE customer
-FIELDS TERMINATED BY ',';
-
-ALTER DATABASE ordersystem CHARACTER SET utf8 COLLATE utf8_general_ci;
-
-utf8_general_ci
-
 =================
 Backup
 =================
