@@ -5,14 +5,6 @@ CREATE TABLE boat(
   PRIMARY KEY (bid)
 );
 
-command line prompt> mysql  -u root –p
-mysql> DESCRIBE mysql.user;
-mysql> SELECT user, host FROM mysql.user; //list users within the mysql
-mysql> CREATE USER '[username]'@'localhost' IDENTIFIED BY '[password]’;
-mysql> CREATE DATABASE bongo;
-mysql> GRANT ALL PRIVILEGES ON bongo.* TO '[username]'@'localhost’;  
-mysql> FLUSH PRIVILEGES;
-
 SHOW DATABASES;
 SHOW TABLES;
 
@@ -45,7 +37,7 @@ desc tablename;
 ALTER TABLE reserve drop confirm;
 
 ALTER TABLE reserve ADD CONSTRAINT fk_sid FOREIGN KEY (sid) REFERENCES sailor(sid);
-ALTER TABLE reserve ADD CONSTRAINT fk_sid FOREIGN KEY (sid) REFERENCES sailor(sid);
+ALTER TABLE reserve ADD CONSTRAINT fk_bid FOREIGN KEY (bid) REFERENCES boat(bid);
 ALTER TABLE reserve ADD CONSTRAINT pk_reserve PRIMARY KEY (sid, bid);
 ALTER TABLE reserve ADD CONSTRAINT uc_combined UNIQUE (sid, bid);
 ALTER TABLE sailor ADD PRIMARY KEY (sid);
@@ -75,6 +67,7 @@ INSERT INTO reserve VALUES
 ('22','102','2010-10-14'),
 ('22','103','2010-08-14'),
 ('22','104','2010-07-14'),
+('21','105','2010-07-14'),
 ('31','102','2011-10-14'),
 ('31','103','2011-06-14'),
 ('31','104','2011-12-14'),
@@ -427,6 +420,26 @@ INSERT INTO order_line (ORDER_ID, PRODUCT_ID, ORDERED_QUANTITY) VALUES ('002', '
 SELECT * FROM customer NATURAL JOIN ordert NATURAL JOIN order_line; 
 
 DELETE FROM customer WHERE CUSTOMER_ID ='10001';
+
+LOAD DATA LOCAL INFILE 'ordersystem/customer.csv'
+INTO TABLE customer
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'ordersystem/ordert.csv'
+INTO TABLE ordert
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'ordersystem/product.csv'
+INTO TABLE product
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'ordersystem/order_line.csv'
+INTO TABLE order_line
+FIELDS TERMINATED BY ',';
+
+ALTER DATABASE ordersystem CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+utf8_general_ci
 
 =================
 Backup
