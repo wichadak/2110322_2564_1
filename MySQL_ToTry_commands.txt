@@ -67,13 +67,13 @@ INSERT INTO reserve VALUES
 ('22','102','2010-10-14'),
 ('22','103','2010-08-14'),
 ('22','104','2010-07-14'),
-('21','105','2010-07-14'),
 ('31','102','2011-10-14'),
 ('31','103','2011-06-14'),
 ('31','104','2011-12-14'),
 ('64','101','2009-05-14'),
 ('64','102','2009-08-14'),
 ('74','103','2009-08-14');
+
 
 INSERT INTO reserve (sid, bid, day) VALUES (21, 105, '2009-08-14');
 
@@ -151,6 +151,93 @@ AND S.sid IN
 FROM sailor S, boat B, reserve R
 WHERE s.sid = R.sid AND R.bid = B.bid AND B.color = 'Green');
 
+SELECT S.sname 
+FROM sailor S, boat B, reserve R
+WHERE s.sid = R.sid AND R.bid = B.bid AND B.color = 'Green'
+AND S.sid NOT IN
+(SELECT S.sid 
+FROM sailor S, boat B, reserve R
+WHERE s.sid = R.sid AND R.bid = B.bid AND B.color = 'Red');
+
+SELECT COUNT(*)
+FROM sailor S;
+
+SELECT COUNT(DISTINCT S.sname) 
+FROM sailor S;
+
+SELECT SUM(S.age) 
+FROM sailor S
+WHERE S.rating = 10;
+
+SELECT AVG(S.age) 
+FROM sailor S
+WHERE S.rating = 10;
+
+SELECT S.sname, MAX(S.age)
+FROM sailor S;
+
+
+SELECT S.sname, S.age
+FROM sailor S
+WHERE S.age = 
+(SELECT MAX(S2.age)
+ FROM sailor S2);
+
+
+SELECT sname 
+FROM sailor 
+WHERE age BETWEEN 25 AND 35;
+
+SELECT * 
+FROM sailor
+WHERE sname NOT BETWEEN 'Hansen' 
+AND 'Perttersen';
+
+SELECT * 
+FROM sailor
+WHERE sname LIKE 'A%';
+
+
+============
+BANKING
+============
+
+As root:
+CREATE DATABASE banking;
+GRANT ALL PRIVILEGES ON banking.* TO 'wichadak'@'localhost';
+FLUSH PRIVILEGES;
+
+As wichadak:
+USE banking;
+SOURCE banking.sql;
+
+LOAD DATA LOCAL INFILE 'Banking/branch.csv'
+INTO TABLE branch
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'Banking/customer.csv'
+INTO TABLE customer
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'Banking/account.csv'
+INTO TABLE account
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'Banking/loan.csv'
+INTO TABLE loan
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'Banking/depositor.csv'
+INTO TABLE depositor
+FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INFILE 'Banking/borrower.csv'
+INTO TABLE borrower
+FIELDS TERMINATED BY ',';
+
+SELECT A.account_number
+FROM account A, branch B
+WHERE A.branch_name = B.branch_name AND 
 SELECT COUNT(*)
 FROM sailor S;
 
@@ -327,7 +414,7 @@ FROM customer C, account A, depositor D
 WHERE C.customer_name = D.customer_name AND
   D.account_number = A.account_number
 GROUP BY customer_name
-HAVING count() > 1;
+HAVING count(*) > 1;
 
 SELECT C.customer_name, SUM(A.balance) as sum_balance
 FROM customer C, account A, depositor D
@@ -343,6 +430,10 @@ INSERT INTO account (account_number, branch_name, balance) VALUES (‘7', ‘X',
 SELECT * 
 FROM account A JOIN branch B 
 ON A.branch_name = B.branch_name;
+
+SELECT * 
+FROM account A, branch B
+WHERE A.branch_name = B.branch_name;
 
 SELECT *
 FROM account NATURAL JOIN branch;
@@ -380,22 +471,32 @@ CREATE DATABASE ordersystem;
 GRANT ALL PRIVILEGES ON ordersystem.* TO 'wichadak'@'localhost';  
 FLUSH PRIVILEGES;
 
+GRANT ALTER ON ordersystem3.* to 'wichadak3'@'localhost';
+
 As wichadak
 ===========
-USE ordersystem;
+USE ordersystem3;
+
+ALTER DATABASE ordersystem3 CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE PRODUCT(
-PRODUCT_ID INTEGER NOT NULL, PRODUCT_DESCRIPTION VARCHAR(50), PRODUCT_FINISH ENUM('Cherry', 'Natural Ash',
+PRODUCT_ID INTEGER NOT NULL, 
+PRODUCT_DESCRIPTION VARCHAR(50), 
+PRODUCT_FINISH ENUM('Cherry', 'Natural Ash',
 'White Ash', 'Red Oak', 'Natural
-Oak', 'Walnut'), STANDARD_PRICE DECIMAL(6,2),
+Oak', 'Walnut'), 
+STANDARD_PRICE DECIMAL(6,2),
 CONSTRAINT PRODUCT_PK PRIMARY KEY(PRODUCT_ID));
 
 CREATE TABLE CUSTOMER(
-CUSTOMER_ID INTEGER(11) NOT NULL, CUSTOMER_NAME VARCHAR(25) NOT NULL, CUSTOMER_ADDRESS VARCHAR(30),
+CUSTOMER_ID INTEGER(11) NOT NULL, 
+CUSTOMER_NAME VARCHAR(25) NOT NULL, 
+CUSTOMER_ADDRESS VARCHAR(30),
 CITY VARCHAR(20),
-STATE VARCHAR(2),
 POSTAL_CODE VARCHAR(9),
 CONSTRAINT CUSTOMER_PK PRIMARY KEY (CUSTOMER_ID));
+
+ALTER TABLE customer CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE ORDERT(
     ORDER_ID INTEGER(11) NOT NULL,
@@ -405,12 +506,14 @@ CREATE TABLE ORDERT(
     CONSTRAINT ORDER_FK FOREIGN KEY(CUSTOMER_ID) REFERENCES CUSTOMER(CUSTOMER_ID));
 
 CREATE TABLE ORDER_LINE(
-ORDER_ID INTEGER(11) NOT NULL, PRODUCT_ID INTEGER(11) NOT NULL, ORDERED_QUANTITY INTEGER(11),
-CONSTRAINT ORDER_LINE_PK PRIMARY KEY (ORDER_ID, PRODUCT_ID),
-CONSTRAINT ORDER_LINE_FK1 FOREIGN KEY (ORDER_ID) REFERENCES ORDERT(ORDER_ID),
-CONSTRAINT ORDER_LINE_FK2 FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT(PRODUCT_ID));
+    ORDER_ID INTEGER(11) NOT NULL, 
+    PRODUCT_ID INTEGER(11) NOT NULL, 
+    ORDERED_QUANTITY INTEGER(11),
+    CONSTRAINT ORDER_LINE_PK PRIMARY KEY (ORDER_ID, PRODUCT_ID),
+    CONSTRAINT ORDER_LINE_FK1 FOREIGN KEY (ORDER_ID) REFERENCES ORDERT(ORDER_ID),
+    CONSTRAINT ORDER_LINE_FK2 FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT(PRODUCT_ID));
 
-INSERT INTO customer (CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_ADDRESS, CITY, POSTAL_CODE) VALUES ('10001', 'John', 'Pathumwan', 'Bangkok', '10330');
+INSERT INTO customer (CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_ADDRESS, CITY, POSTAL_CODE) VALUES ('10001', 'จอน', 'ปทุมวัน','กรุงเทพ', '10330');
 INSERT INTO product (PRODUCT_ID, PRODUCT_DESCRIPTION, PRODUCT_FINISH, STANDARD_PRICE) VALUES ('0001', 'Table', 'Red Oak', '2000'), ('0002', 'Chair', 'Walnut', '5000');
 INSERT INTO ordert (ORDER_ID, CUSTOMER_ID) VALUES ('001', '10001');
 INSERT INTO order_line (ORDER_ID, PRODUCT_ID, ORDERED_QUANTITY) VALUES ('001', '0001', '1'), ('001', '0002', '5');
@@ -419,7 +522,7 @@ INSERT INTO order_line (ORDER_ID, PRODUCT_ID, ORDERED_QUANTITY) VALUES ('002', '
 
 SELECT * FROM customer NATURAL JOIN ordert NATURAL JOIN order_line; 
 
-DELETE FROM customer WHERE CUSTOMER_ID ='10001';
+DELETE FROM customer WHERE CUSTOMER_ID ='10001'; # error due to referential integrity constraints
 
 LOAD DATA LOCAL INFILE 'ordersystem/customer.csv'
 INTO TABLE customer
@@ -437,7 +540,7 @@ LOAD DATA LOCAL INFILE 'ordersystem/order_line.csv'
 INTO TABLE order_line
 FIELDS TERMINATED BY ',';
 
-ALTER DATABASE ordersystem CHARACTER SET utf8 COLLATE utf8_general_ci;
+
 
 utf8_general_ci
 
